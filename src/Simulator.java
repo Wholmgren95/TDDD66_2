@@ -9,7 +9,11 @@ public class Simulator {
         //encodings, 0=250, 1=500, 2=850, 3 = 1300 Kbit/s
         int curBuf = 0;
         int request = 0;
-        final Map<Integer, Integer> encodings = Map.of(0,250,1,500,2,850,3,1300);
+        Map<Integer, Integer> encodings = new HashMap<Integer, Integer>();
+        encodings.put(0,250);
+        encodings.put(1,500);
+        encodings.put(2,850);
+        encodings.put(3,1300);
         //log into throughput, tp
         //ArrayDeque tp = new ArrayDeque();
         int tp;
