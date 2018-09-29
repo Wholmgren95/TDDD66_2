@@ -2,42 +2,72 @@ import java.io.*;
 import java.util.*;
 
 public class Simulator {
+    private int minBuf = 4;
+    private int maxBuf = 6;
     private int request = 0;
     private int curQuality = 0;
+    private int abw =0;
+    Map<Integer, Integer> encodings = new HashMap<Integer, Integer>();
+    Fragment fragment;
+    private int curBuf = 0;
 
-    public void simulate(int minBuf, int maxBuf, String file) throws IOException {
+    public void simulate(String file) throws IOException {
         //encodings, 0=250, 1=500, 2=850, 3 = 1300 Kbit/s
-        int curBuf = 0;
+
         int request = 0;
-        Map<Integer, Integer> encodings = new HashMap<Integer, Integer>();
+
         encodings.put(0,250);
         encodings.put(1,500);
         encodings.put(2,850);
         encodings.put(3,1300);
+        fragment = new Fragment(encodings.get(curQuality));
         //log into throughput, tp
         //ArrayDeque tp = new ArrayDeque();
         int tp;
         BufferedReader reader = new BufferedReader(new FileReader(file));
         String line;
+
         while ((line = reader.readLine()) != null){
-            checkRequest();
+
             String[] parts = line.split("\\s+");
             //tp.add(Integer.parseInt(parts[4]));
             tp = Integer.parseInt(parts[4])*8;
-
-            //om vi ska höja
-            if(tp >= encodings.get(curQuality+1)){
-                request++;
-            //om vi ska sänka
-            }else if(tp < encodings.get(curQuality)){
-                if(tp < encodings.get(curQuality-1)) request--;
-                request--;
+            if(curBuf<maxBuf && fragment.isDownloaded()){
+                fragment = new Fragment(encodings.get(curQuality));
+            }
+            if(!fragment.isDownloaded()){
+                downloadFragment(tp);
+            }
+            if(curBuf<minBuf) System.out.println("Pause");
+            else{
+                System.out.println("Play");
+                curBuf--;
             }
 
         }
-
     }
-    private void checkRequest() {
+    public void downloadFragment(int tp){
+        if(fragment.download(tp)) {
+            curBuf += 4;
+            int newEst = fragment.getSize() / fragment.getTime();
+            //α = 1 if option 1, 0.5? if option 2
+            int α = 1;
+            //available bandwidth
+            int option = (1 - α) * abw + α * newEst;
+            abw = option;
+            //om vi ska höja
+            if (curQuality<3 && abw >= encodings.get(curQuality + 1)) {
+                request++;
+                //om vi ska sänka
+            } else if (abw < encodings.get(curQuality)) {
+                if (curQuality>0 && abw < encodings.get(curQuality - 1)) request--;
+                request--;
+            }
+            checkRequest();
+        }
+    }
+
+    public void checkRequest() {
         if (request > curQuality) {
             if(curQuality < 3) curQuality++;
             else request = 3;
@@ -51,7 +81,7 @@ public class Simulator {
 
     public static void main(String[] args) throws IOException{
         Simulator sim = new Simulator();
-        sim.simulate(4,6, "C:\\Users\\Wille\\IdeaProjects\\TDDD66_2\\src\\dl.log");
+        sim.simulate("C:\\Users\\Wille\\IdeaProjects\\TDDD66_2\\src\\dl.log");
     }
 }
 
