@@ -6,13 +6,14 @@ public class Simulator {
     private int maxBuf = 6;
     private int request = 0;
     private int curQuality = 0;
-    private int abw =0;
+    private float abw =0;
     private Map<Integer, Integer> encodings = new HashMap<Integer, Integer>();
     Fragment fragment;
     private int curBuf = 0;
     private ArrayList bufferHistory = new ArrayList();
     private ArrayList qualityHistory = new ArrayList();
     private ArrayList requestHistory = new ArrayList();
+    private int time = 0;
 
     public void simulate(String file) throws IOException {
 
@@ -28,7 +29,9 @@ public class Simulator {
         String line;
 
         while ((line = reader.readLine()) != null){
-
+            if(time==80){
+                System.out.println("Debug");
+            }
             qualityHistory.add(curQuality);
             requestHistory.add(request);
             String[] parts = line.split("\\s+");
@@ -47,6 +50,7 @@ public class Simulator {
                 System.out.println("Play");
                 curBuf--;
             }
+            time++;
         }
     }
     public void downloadFragment(int tp){
@@ -54,9 +58,9 @@ public class Simulator {
             curBuf += 4;
             int newEst = fragment.getSize() / fragment.getTime();
             //α = 1 if option 1, 0.5? if option 2
-            int α = 1;
+            float α = 0.5f;
             //available bandwidth
-            int option = (1 - α) * abw + α * newEst;
+            float option = (1 - α) * abw + α * newEst;
             abw = option;
             //om vi ska höja
             if (curQuality<3 && abw >= encodings.get(curQuality + 1)) {
@@ -85,11 +89,14 @@ public class Simulator {
     private void write(){
         try {
             //buffersize
-            BufferedWriter writer = new BufferedWriter(new FileWriter("C:\\Users\\Wille\\IdeaProjects\\TDDD66_2\\src\\input1.txt"));
+            //BufferedWriter writer = new BufferedWriter(new FileWriter("C:\\Users\\Wille\\IdeaProjects\\TDDD66_2\\src\\input1.txt"));
+            BufferedWriter writer = new BufferedWriter(new FileWriter("C:\\cygwin64\\TDDD66_2\\src\\input1.txt"));
             //current quality
-            BufferedWriter writer2 = new BufferedWriter(new FileWriter("C:\\Users\\Wille\\IdeaProjects\\TDDD66_2\\src\\input2.txt"));
+            //BufferedWriter writer2 = new BufferedWriter(new FileWriter("C:\\Users\\Wille\\IdeaProjects\\TDDD66_2\\src\\input2.txt"));
+            BufferedWriter writer2 = new BufferedWriter(new FileWriter("C:\\cygwin64\\TDDD66_2\\src\\input2.txt"));
             //requested quality
-            BufferedWriter writer3 = new BufferedWriter(new FileWriter("C:\\Users\\Wille\\IdeaProjects\\TDDD66_2\\src\\input3.txt"));
+            //BufferedWriter writer3 = new BufferedWriter(new FileWriter("C:\\Users\\Wille\\IdeaProjects\\TDDD66_2\\src\\input3.txt"));
+            BufferedWriter writer3 = new BufferedWriter(new FileWriter("C:\\cygwin64\\TDDD66_2\\src\\input3.txt"));
             for (int i = 0; i < bufferHistory.size(); i++) {
                 writer.write(i + " " + bufferHistory.get(i) + "\n");
                 writer2.write(i + " " + qualityHistory.get(i) + "\n");
@@ -98,7 +105,8 @@ public class Simulator {
             writer.close();
             writer2.close();
             writer3.close();
-
+            System.out.println(time);
+            System.out.println(Collections.max(requestHistory));
 
         }
         catch (Exception e) {
@@ -108,8 +116,10 @@ public class Simulator {
 
     public static void main(String[] args) throws IOException{
         Simulator sim = new Simulator();
-        sim.simulate("C:\\Users\\Wille\\IdeaProjects\\TDDD66_2\\src\\dl.log");
+        sim.simulate("C:\\cygwin64\\TDDD66_2\\src\\dl.log");
+        //sim.simulate("C:\\Users\\Wille\\IdeaProjects\\TDDD66_2\\src\\dl.log");
         sim.write();
+
     }
 }
 

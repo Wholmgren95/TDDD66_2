@@ -12,8 +12,9 @@ public class Fragment {
     }
 
     public boolean download(int bits){
-        downloaded = size-(downloaded+bits);
-        if(downloaded <=0) isDownloaded = true;
+        //FEL PÅ DOM TVÅ UNDER
+        downloaded = bits+downloaded;
+        if(downloaded >=size) isDownloaded = true;
         else isDownloaded = false;
         downloadTime++;
         return isDownloaded;
