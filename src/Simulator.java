@@ -35,9 +35,6 @@ public class Simulator {
             String[] parts = line.split("\\s+");
             //tp.add(Integer.parseInt(parts[4]));
             tp = Integer.parseInt(parts[4])*8;
-            if(time == 80){
-                System.out.println("Debug");
-            }
             if(curBuf<minBuf) resumeDownload = true;
             if(curBuf>=minBuf) resumePlay=true;
             if(curBuf>=maxBuf){
