@@ -12,11 +12,12 @@ public class Simulator {
     private int curBuf = 0;
     private ArrayList bufferHistory = new ArrayList();
     private ArrayList qualityHistory = new ArrayList();
-    private ArrayList requestHistory = new ArrayList();
+    private Map<Integer, Integer> requestHistory = new HashMap<Integer, Integer>();
     private int time = 0;
 
     public void simulate(String file) throws IOException {
-
+        boolean resumePlay = false;
+        boolean resumeDownload = true;
         encodings.put(0,250000);
         encodings.put(1,500000);
         encodings.put(2,850000);
@@ -29,24 +30,35 @@ public class Simulator {
         String line;
 
         while ((line = reader.readLine()) != null){
-            if(time==80){
-                System.out.println("Debug");
-            }
             qualityHistory.add(curQuality);
-            requestHistory.add(request);
+            bufferHistory.add(curBuf);
             String[] parts = line.split("\\s+");
             //tp.add(Integer.parseInt(parts[4]));
             tp = Integer.parseInt(parts[4])*8;
+            if(time == 80){
+                System.out.println("Debug");
+            }
+            if(curBuf<minBuf) resumeDownload = true;
+            if(curBuf>=minBuf) resumePlay=true;
+            if(curBuf>=maxBuf){
+                resumeDownload = false;
+            }
             if(curBuf<maxBuf && fragment.isDownloaded()){
            //     System.out.println(curQuality);
-                fragment = new Fragment(encodings.get(curQuality));
+
+                    fragment = new Fragment(encodings.get(curQuality));
+
             }
-            if(!fragment.isDownloaded()){
+            if(!fragment.isDownloaded() && resumeDownload){
                 downloadFragment(tp);
             }
-            bufferHistory.add(curBuf);
-            if(curBuf<minBuf) System.out.println("Pause");
-            else{
+
+
+            if(curBuf==0){
+                System.out.println("Pause");
+                resumePlay = false;
+            }
+            else if(resumePlay){
                 System.out.println("Play");
                 curBuf--;
             }
@@ -71,6 +83,7 @@ public class Simulator {
                 request--;
             }
             checkRequest();
+            requestHistory.put(time,request);
         }
     }
 
@@ -100,13 +113,12 @@ public class Simulator {
             for (int i = 0; i < bufferHistory.size(); i++) {
                 writer.write(i + " " + bufferHistory.get(i) + "\n");
                 writer2.write(i + " " + qualityHistory.get(i) + "\n");
-                writer3.write(i + " " + requestHistory.get(i) + "\n");
+                if(requestHistory.containsKey(i)) writer3.write(i + " " + requestHistory.get(i) + "\n");
             }
             writer.close();
             writer2.close();
             writer3.close();
             System.out.println(time);
-            System.out.println(Collections.max(requestHistory));
 
         }
         catch (Exception e) {
