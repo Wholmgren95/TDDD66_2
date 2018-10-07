@@ -67,7 +67,7 @@ public class Simulator {
             curBuf += 4;
             int newEst = fragment.getSize() / fragment.getTime();
             //α = 1 if option 1, 0.5? if option 2
-            float α = 0.5f;
+            float α = 1f;
             //available bandwidth
             float option = (1 - α) * abw + α * newEst;
             abw = option;
