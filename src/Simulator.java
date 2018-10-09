@@ -22,7 +22,7 @@ public class Simulator {
         encodings.put(1,500000);
         encodings.put(2,850000);
         encodings.put(3,1300000);
-        fragment = new Fragment(encodings.get(curQuality));
+        //fragment = new Fragment(encodings.get(curQuality));
         //log into throughput, tp
         //ArrayDeque tp = new ArrayDeque();
         int tp;
@@ -40,11 +40,11 @@ public class Simulator {
             if(curBuf>=maxBuf){
                 resumeDownload = false;
             }
-            if(curBuf<maxBuf && fragment.isDownloaded()){
+            if(time == 0 || (curBuf<maxBuf && fragment.isDownloaded())){
            //     System.out.println(curQuality);
-
-                    fragment = new Fragment(encodings.get(curQuality));
-
+               // checkRequest();
+                //requestHistory.put(time,request);
+                fragment = new Fragment(encodings.get(curQuality));
             }
             if(!fragment.isDownloaded() && resumeDownload){
                 downloadFragment(tp);
@@ -67,7 +67,7 @@ public class Simulator {
             curBuf += 4;
             int newEst = fragment.getSize() / fragment.getTime();
             //α = 1 if option 1, 0.5? if option 2
-            float α = 1f;
+            float α = 0.5f;
             //available bandwidth
             float option = (1 - α) * abw + α * newEst;
             abw = option;
